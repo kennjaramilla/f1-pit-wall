@@ -1,3 +1,4 @@
+using F1PitWall.Api.Auth;
 using F1PitWall.Api.Ingestion;
 using F1PitWall.Api.Queries;
 
@@ -7,7 +8,7 @@ public static class RaceEndpoints
 {
     public static IEndpointRouteBuilder MapRaceEndpoints(this IEndpointRouteBuilder app)
     {
-        var races = app.MapGroup("/api/races").WithTags("Races");
+        var races = app.MapGroup("/api/races").WithTags("Races").RequireAuthorization(AuthSetup.Viewer);
 
         races.MapGet("/", (RaceQueries q, CancellationToken ct) => q.ListRaces(ct))
             .WithSummary("Cached races with summary and track outline");
@@ -21,18 +22,21 @@ public static class RaceEndpoints
             .WithSummary("Car positions on a fixed time grid");
 
         races.MapGet("/{key:int}/telemetry", (int key, RaceQueries q, CancellationToken ct) => q.TelemetryDrivers(key, ct))
-            .WithSummary("Drivers with fastest-lap telemetry");
+            .WithSummary("Drivers with fastest-lap telemetry")
+            .RequireAuthorization(AuthSetup.Strategist);
 
         races.MapGet("/{key:int}/telemetry/{driver:int}", async (int key, int driver, RaceQueries q, CancellationToken ct) =>
                 await q.Telemetry(key, driver, ct) is { } telemetry ? Results.Ok(telemetry) : Results.NotFound())
-            .WithSummary("Fastest-lap telemetry by distance");
+            .WithSummary("Fastest-lap telemetry by distance")
+            .RequireAuthorization(AuthSetup.Strategist);
 
         races.MapPost("/{key:int}/ingest", async (int key, IngestionService ingest, CancellationToken ct) =>
             {
                 await ingest.Ingest(key, ct);
                 return Results.NoContent();
             })
-            .WithSummary("Fetch a race from OpenF1 into the cache (takes minutes)");
+            .WithSummary("Fetch a race from OpenF1 into the cache (takes minutes)")
+            .RequireAuthorization(AuthSetup.Admin);
 
         return app;
     }

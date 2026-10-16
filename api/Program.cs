@@ -1,4 +1,5 @@
 using System.Text.Json;
+using F1PitWall.Api.Auth;
 using F1PitWall.Api.Data;
 using F1PitWall.Api.Endpoints;
 using F1PitWall.Api.Ingestion;
@@ -29,6 +30,7 @@ openF1.AddStandardResilienceHandler(o =>
 openF1.AddHttpMessageHandler<BufferContentHandler>(); // inner handler: runs inside each resilient attempt
 
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);
+builder.Services.AddPitWallAuth(builder.Configuration);
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks().AddDbContextCheck<PitWallDb>();
 builder.Services.AddOpenApi();
@@ -57,6 +59,8 @@ if (args.FirstOrDefault() is "ingest" or "export")
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapOpenApi();
 app.MapScalarApiReference("/docs");
 app.MapGet("/", () => Results.Redirect("/docs")).ExcludeFromDescription();
