@@ -19,3 +19,5 @@ scratch/
 .DS_Store
 .env*
 !.env.example
+web/AGENTS.md
+web/CLAUDE.md
