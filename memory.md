@@ -64,5 +64,5 @@ Context for anyone (or any future session) picking this project up. Read this an
 5. Observability: structured JSON logs, correlation IDs, request logging, web vitals reporting, an error boundary.
 6. Security headers and rate limiting (`AddRateLimiter`) on the API.
 7. SignalR to stream replay frames in live mode.
-8. docker-compose for API plus web in live mode. The API Dockerfile builds and runs (verified: `/health` 200, anonymous `/api/races` 401); it starts with an empty DB, so ingest or mount `api/db`.
+8. docker-compose for API plus web in live mode. The API Dockerfile builds and runs (verified on port 5177: `/health` 200, anonymous `/api/races` 401); it starts with an empty DB, so ingest or mount `api/db`.
 9. More races; sector-level timing; driver focus mode on the track map.
