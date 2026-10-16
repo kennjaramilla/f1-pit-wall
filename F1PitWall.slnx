@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/api.tests/">
+    <Project Path="api.tests/F1PitWall.Api.Tests.csproj" />
+  </Folder>
+  <Folder Name="/api/">
+    <Project Path="api/F1PitWall.Api.csproj" />
+  </Folder>
+</Solution>

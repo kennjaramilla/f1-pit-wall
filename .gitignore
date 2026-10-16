@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+api/db/
+*.user
+
+# Node / Next
+web/node_modules/
+web/.next/
+web/out/
+web/next-env.d.ts
+web/cypress/screenshots/
+web/cypress/videos/
+web/.vercel
+.vercel
+
+# Local
+scratch/
+.DS_Store
+.env*
+!.env.example
