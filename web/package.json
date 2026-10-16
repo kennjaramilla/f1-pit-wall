@@ -17,13 +17,16 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.13.0",
+    "bcryptjs": "^3.0.3",
     "d3-array": "^3.2.4",
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0",
+    "jose": "^6.2.12",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-redux": "^9.3.0"
+    "react-redux": "^9.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

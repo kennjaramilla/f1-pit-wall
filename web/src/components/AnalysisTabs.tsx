@@ -1,23 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { requiredRole, type Permission } from "@/lib/auth/permissions";
 import type { RaceModel } from "@/lib/race";
+import { useAppSelector } from "@/store/hooks";
+import { selectCan } from "@/store/authSlice";
 import { GapChart } from "./GapChart";
 import { StrategyChart } from "./StrategyChart";
 import { TelemetryCompare } from "./TelemetryCompare";
 import { Panel } from "./ui";
 
-const TABS = [
-  { id: "strategy", label: "Tyre strategy" },
-  { id: "gaps", label: "Gap to leader" },
-  { id: "telemetry", label: "Telemetry" },
-] as const;
+const TABS: { id: "strategy" | "gaps" | "telemetry"; label: string; permission: Permission }[] = [
+  { id: "strategy", label: "Tyre strategy", permission: "replay:view" },
+  { id: "gaps", label: "Gap to leader", permission: "replay:view" },
+  { id: "telemetry", label: "Telemetry", permission: "telemetry:view" },
+];
 
 type Tab = (typeof TABS)[number]["id"];
 
 /** WAI-ARIA tabs: arrow keys move between tabs, only the active one is in the tab order. */
 export function AnalysisTabs({ model }: { model: RaceModel }) {
   const [tab, setTab] = useState<Tab>("strategy");
+  const canTelemetry = useAppSelector((s) => selectCan(s, "telemetry:view"));
+  const allowed = (t: (typeof TABS)[number]) => t.permission !== "telemetry:view" || canTelemetry;
 
   const onKeyDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
@@ -47,14 +52,38 @@ export function AnalysisTabs({ model }: { model: RaceModel }) {
             }`}
           >
             {t.label}
+            {!allowed(t) && (
+              <span
+                aria-label={`(requires ${requiredRole(t.permission)} role)`}
+                title={`Requires ${requiredRole(t.permission)} role`}
+                className="ml-1.5"
+              >
+                🔒
+              </span>
+            )}
           </button>
         ))}
       </div>
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} tabIndex={0}>
         {tab === "strategy" && <StrategyChart model={model} />}
         {tab === "gaps" && <GapChart model={model} />}
-        {tab === "telemetry" && <TelemetryCompare model={model} />}
+        {tab === "telemetry" &&
+          (canTelemetry ? <TelemetryCompare model={model} /> : <LockedFeature role={requiredRole("telemetry:view")} />)}
       </div>
     </Panel>
+  );
+}
+
+function LockedFeature({ role }: { role: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 px-6 py-12 text-center" data-cy="locked-feature">
+      <span aria-hidden className="text-2xl">
+        🔒
+      </span>
+      <p className="font-semibold">Requires {role} role</p>
+      <p className="max-w-sm text-sm text-muted">
+        Fastest-lap telemetry is available to strategists. Sign in with the Strategist demo account to compare speed, throttle and braking.
+      </p>
+    </div>
   );
 }

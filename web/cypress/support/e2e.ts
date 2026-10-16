@@ -8,11 +8,17 @@ Cypress.Commands.add("checkA11yStrict", (context?: string) => {
   });
 });
 
+// Signs in through the real login route so the httpOnly session cookie is set.
+Cypress.Commands.add("login", (role: "Viewer" | "Strategist" | "Admin") => {
+  cy.request("POST", "/api/auth/login", { email: `${role.toLowerCase()}@pitwall.dev`, password: `${role.toLowerCase()}-demo` });
+});
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       checkA11yStrict(context?: string): Chainable<void>;
+      login(role: "Viewer" | "Strategist" | "Admin"): Chainable<void>;
     }
   }
 }

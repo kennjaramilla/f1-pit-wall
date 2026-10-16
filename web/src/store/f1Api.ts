@@ -1,17 +1,18 @@
-import { createApi, fetchBaseQuery, type BaseQueryFn, type FetchArgs, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, type BaseQueryFn, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import type { RaceBundle, RaceSummary, Replay, Telemetry } from "@/lib/types";
 
-// Live mode calls the .NET API; snapshot mode reads the JSON files the same API exported.
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-export const dataMode: "live" | "snapshot" = API_URL ? "live" : "snapshot";
+// Live mode goes through the Next.js proxy route (/api/live), which forwards to the .NET API with the
+// user's token; snapshot mode reads the JSON files the same API exported.
+export const dataMode: "live" | "snapshot" = process.env.NEXT_PUBLIC_DATA_MODE === "live" ? "live" : "snapshot";
+const live = dataMode === "live";
 
-// Absolute even in snapshot mode: fetchBaseQuery builds a Request, which needs a full URL outside the browser.
+// Absolute URL: fetchBaseQuery builds a Request, which needs one outside the browser (tests).
 const origin = typeof window === "undefined" ? "http://localhost" : window.location.origin;
-const rawBaseQuery = fetchBaseQuery({ baseUrl: API_URL ? `${API_URL}/api` : `${origin}/data` });
+const rawBaseQuery = fetchBaseQuery({ baseUrl: `${origin}${live ? "/api/live" : "/data"}` });
 
 /** Endpoints are written as API paths ("/races/1/replay"); snapshot mode maps them to "/data/races/1/replay.json". */
 const baseQuery: BaseQueryFn<string, unknown, FetchBaseQueryError> = (path, api, extra) =>
-  rawBaseQuery((API_URL ? path : `${path}.json`) satisfies string | FetchArgs, api, extra);
+  rawBaseQuery(live ? path : `${path}.json`, api, extra);
 
 export const f1Api = createApi({
   reducerPath: "f1Api",
@@ -33,6 +34,8 @@ export const { useRacesQuery, useRaceQuery, useReplayQuery, useTelemetryDriversQ
 export function errorMessage(error: unknown): string {
   const status = (error as FetchBaseQueryError | undefined)?.status;
   if (status === 404) return "This race isn't in the cache yet.";
-  if (status === "FETCH_ERROR") return dataMode === "live" ? "Can't reach the Pit Wall API." : "Network error while loading race data.";
+  if (status === 401) return "Your session has expired. Please sign in again.";
+  if (status === 403) return "Your role doesn't include this data.";
+  if (status === "FETCH_ERROR") return live ? "Can't reach the Pit Wall API." : "Network error while loading race data.";
   return typeof status === "number" ? `Request failed (${status}).` : "Something went wrong loading race data.";
 }

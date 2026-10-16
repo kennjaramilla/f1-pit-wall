@@ -1,5 +1,6 @@
 describe("race replay", () => {
   beforeEach(() => {
+    cy.login("Strategist");
     cy.visit("/race/9839");
     cy.get("[data-cy=track-map]").should("be.visible");
     cy.get("[data-cy=leaderboard-row]").should("have.length", 20);

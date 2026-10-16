@@ -1,5 +1,6 @@
 describe("race picker", () => {
   it("lists cached races and opens a replay", () => {
+    cy.login("Viewer");
     cy.visit("/");
     cy.contains("h1", "See the race the way the strategists did.");
     cy.get("[data-cy=race-card]").should("have.length.at.least", 1);

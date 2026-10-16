@@ -51,7 +51,7 @@ export function Leaderboard({ model }: { model: RaceModel }) {
                 type="button"
                 onClick={() => dispatch(driverToggled(r.driver.number))}
                 aria-pressed={isSel}
-                                title={`${r.driver.fullName} · ${r.driver.team}`}
+                title={`${r.driver.fullName} · ${r.driver.team}`}
                 data-cy="leaderboard-row"
                 className={`grid h-full w-full grid-cols-[2rem_1fr_6.5rem_3.5rem_2.5rem] items-center gap-2 px-3 text-left transition-colors hover:bg-panel-2 ${
                   isSel ? "bg-panel-3" : ""

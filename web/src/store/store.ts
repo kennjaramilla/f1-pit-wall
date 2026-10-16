@@ -1,9 +1,10 @@
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
+import { authSlice } from "./authSlice";
 import { f1Api } from "./f1Api";
 import { replaySlice } from "./replaySlice";
 import { telemetrySlice } from "./telemetrySlice";
 
-const rootReducer = combineSlices(f1Api, replaySlice, telemetrySlice);
+const rootReducer = combineSlices(f1Api, authSlice, replaySlice, telemetrySlice);
 
 export type RootState = ReturnType<typeof rootReducer>;
 
