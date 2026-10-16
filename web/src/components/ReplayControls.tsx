@@ -3,6 +3,7 @@
 import { formatRaceClock } from "@/lib/format";
 import type { RaceModel } from "@/lib/race";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { selectRaceNotes } from "@/store/notesSlice";
 import { SPEEDS, paused, played, seeked, speedChanged } from "@/store/replaySlice";
 import { selectCurrentLap, selectReplay } from "@/store/selectors";
 
@@ -19,6 +20,8 @@ export function ReplayControls({ model, onShowHelp }: { model: RaceModel; onShow
   const seek = (ms: number) => dispatch(seeked(ms));
   const { windowStartMs: min, windowEndMs: max, lapStarts, periods } = model.bundle;
   const pct = (ms: number) => ((ms - min) / (max - min)) * 100;
+  const notes = useAppSelector((s) => selectRaceNotes(s, model.bundle.race.sessionKey));
+  const lapStart = (n: number) => lapStarts.find((l) => l.lap === n)?.t;
   const lapTicks = lapStarts.filter((l) => l.lap === 1 || l.lap % 5 === 0);
 
   const jumpLap = (delta: number) => {
@@ -95,6 +98,29 @@ export function ReplayControls({ model, onShowHelp }: { model: RaceModel; onShow
         </div>
       </div>
 
+      {notes.length > 0 && (
+        <ul className="relative h-5" aria-label="Your notes on the timeline" data-cy="note-markers">
+          {notes.map((n) => {
+            const start = lapStart(n.lap);
+            if (start == null) return null;
+            return (
+              <li key={n.id} className="absolute -translate-x-1/2" style={{ left: `${pct(start)}%` }}>
+                <button
+                  type="button"
+                  onClick={() => seek(start)}
+                  title={`${n.title} (lap ${n.lap})`}
+                  aria-label={`Note: ${n.title}, lap ${n.lap}`}
+                  className="flex h-5 w-4 items-start justify-center text-purple hover:brightness-125"
+                >
+                  <svg viewBox="0 0 10 12" className="h-3.5 w-3" fill="currentColor" aria-hidden>
+                    <path d="M0 0h10v8l-5 4-5-4z" />
+                  </svg>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
       <div className="relative">
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-panel-3">
           <div className="h-full rounded-full bg-accent/70" style={{ width: `${pct(t)}%` }} />

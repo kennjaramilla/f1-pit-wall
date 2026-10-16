@@ -1,10 +1,12 @@
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { authSlice } from "./authSlice";
 import { f1Api } from "./f1Api";
+import { notesPersistence } from "./notesPersistence";
+import { notesSlice } from "./notesSlice";
 import { replaySlice } from "./replaySlice";
 import { telemetrySlice } from "./telemetrySlice";
 
-const rootReducer = combineSlices(f1Api, authSlice, replaySlice, telemetrySlice);
+const rootReducer = combineSlices(f1Api, authSlice, replaySlice, telemetrySlice, notesSlice);
 
 export type RootState = ReturnType<typeof rootReducer>;
 
@@ -13,7 +15,7 @@ export function makeStore(preloadedState?: Partial<RootState>) {
   return configureStore({
     reducer: rootReducer,
     preloadedState,
-    middleware: (getDefault) => getDefault().concat(f1Api.middleware),
+    middleware: (getDefault) => getDefault().prepend(notesPersistence.middleware).concat(f1Api.middleware),
   });
 }
 

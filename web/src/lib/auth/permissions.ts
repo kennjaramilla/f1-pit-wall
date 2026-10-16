@@ -5,6 +5,7 @@ export type Role = (typeof ROLES)[number];
 const PERMISSIONS = {
   "replay:view": "Viewer",
   "telemetry:view": "Strategist",
+  "notes:edit": "Strategist",
   "admin:view": "Admin",
 } as const satisfies Record<string, Role>;
 

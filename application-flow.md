@@ -13,6 +13,7 @@
    - **Tyre strategy:** stints per driver by compound, with a current-lap cursor.
    - **Gap to leader:** one line per driver. Hover isolates a line, click pins it. Teammates are told apart by dashes, not colour alone.
    - **Telemetry** (Strategist+): two drivers' fastest laps overlaid by distance (speed, throttle, brake, gear). Hovering moves markers on a mini track map.
+   - **Notes** (Strategist+): pin a note (title, note, category, lap) to the race. Notes appear as markers on the scrubber; clicking one seeks to that lap. Create, edit and delete (with confirmation) happen in an inline form. Stored per user on this device in demo mode.
 5. **Follow drivers.** Clicking a driver in the tower, the map or a chart selects them everywhere. `Esc` clears the selection.
 6. **Admin** (Admin only): user and role list; re-ingest is disabled in snapshot mode, with the reason shown.
 
@@ -59,6 +60,7 @@ Snapshot paths mirror these: `/data/races.json`, `/data/races/{key}.json`, `/dat
 | Server state | `store/f1Api.ts` (RTK Query) | races, race bundle, replay frames, telemetry. Cached for the session; one `baseQuery` switches between snapshot and live. |
 | Client state | `store/replaySlice.ts` | open race, time, playing, speed, selected drivers, `seekId` |
 | Client state | `store/telemetrySlice.ts` | the two drivers being compared (reset when a new race opens) |
+| Client state | `store/notesSlice.ts` | the user's race notes (entity adapter), persisted to localStorage by listener middleware |
 | Session | `store/authSlice.ts` | the signed-in user, preloaded from the verified cookie on the server; read-only on the client |
 | Derived | `store/selectors.ts` (`createSelector`) | race model, GPS progress, leaderboard at time t, current lap, track status, recent events |
 | Animation | `lib/replayClock.ts` | 60 fps race time for the track map. Not in Redux. |

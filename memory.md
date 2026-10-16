@@ -7,7 +7,7 @@ Context for anyone (or any future session) picking this project up. Read this an
 - Live: https://kenn-pit-wall.vercel.app (alias; also https://f1-pit-wall-iota.vercel.app). Vercel project `ken-vercel-062926/f1-pit-wall`, Root Directory `web`, git-connected: every push to `main` deploys. Note `f1-pit-wall.vercel.app` belongs to someone else.
 - Repo: https://github.com/kennjaramilla/f1-pit-wall (public)
 - Races cached: 9839 Abu Dhabi 2025, 9947 Britain 2025, 9912 Italy 2025
-- Tests: xUnit 11, Vitest 42, Cypress 12, all green locally. CI runs dotnet build/test plus web lint, typecheck, Vitest and build.
+- Tests: xUnit 11, Vitest 49, Cypress 14, all green locally. CI runs dotnet build/test plus web lint, typecheck, Vitest and build.
 - Vercel env: `AUTH_SECRET` (production). The API needs the same value as `Auth__Secret` in live mode.
 
 ## How to update
@@ -48,6 +48,14 @@ Context for anyone (or any future session) picking this project up. Read this an
 - **Least privilege and audit** (HIPAA-style "minimum necessary"): roles inherit upward from one permission table that is checked server-side. An audit log of sign-ins and admin actions is on the roadmap.
 - **Accessibility as a feature:** keyboard shortcuts, native `<dialog>`, WAI-ARIA tabs, tyre letters as well as colours, dashed teammate lines, AA contrast, reduced-motion support, axe in CI-ready Cypress specs.
 
+## Race notes (demo mode)
+
+- Strategist and Admin can pin notes (title, note, category, lap) to a race. Viewers see a locked tab.
+- `notesSlice` uses `createEntityAdapter`. A listener middleware (`notesPersistence`) writes the user's notes to `localStorage["pitwall:notes:<userId>"]`. `StoreProvider` hydrates them after mount because localStorage is browser-only.
+- Selectors filter by the session's user id, so users only see their own notes. Deletes are soft (`deletedAt`) for retention and audit.
+- Notes appear as markers above the scrubber and in the Notes tab. Clicking either seeks to that lap.
+- This is not real security: localStorage is device-local and user-editable. The server-side version is on the roadmap.
+
 ## Known issues
 
 - Track map labels can overlap when cars bunch up (start, safety car restarts).
@@ -58,7 +66,7 @@ Context for anyone (or any future session) picking this project up. Read this an
 ## Next steps (roadmap; cut for time)
 
 1. Audit log (sign-ins, admin actions) with masked emails for non-self views.
-2. Private race notes per user: resource-based authorization (owner check returning 404, not 403), soft delete, "download my data" and "delete my notes" (privacy hygiene, HIPAA parallels).
+2. Server-side race notes with an ownership check (404 for other users' notes, so their existence isn't leaked), plus "download my data" and "delete my notes". Notes currently live in localStorage per user (demo mode).
 3. Lambda hosting (`Amazon.Lambda.AspNetCoreServer.Hosting`) plus a SAM template with the SQLite file bundled read-only; then CDK or SAM deploy from CI.
 4. Cypress in CI (`cypress-io/github-action` against `next start`).
 5. Observability: structured JSON logs, correlation IDs, request logging, web vitals reporting, an error boundary.
