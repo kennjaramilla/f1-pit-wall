@@ -169,7 +169,7 @@ function TelemetryCharts({ model, laps }: { model: RaceModel; laps: Telemetry[] 
                     ? [0, 100]
                     : [Math.min(...vals) * (c.key === "speed" ? 0.9 : 1), Math.max(...vals)],
               )
-              .range([c.height - 6, 6]);
+              .range([c.height - 6, c.key === "speed" ? 22 : 6]);
             const gen = line<TelemetryPoint>()
               .x((p) => x(p.d))
               .y((p) => y(value(p, c.key)));
