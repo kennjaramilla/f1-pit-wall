@@ -52,6 +52,7 @@ Context for anyone (or any future session) picking this project up. Read this an
 
 - Track map labels can overlap when cars bunch up (start, safety car restarts).
 - Live-mode re-ingest has an Admin-only endpoint, but the admin page button is always disabled.
+- Vercel aliases added with `vercel alias set` sit behind Vercel SSO. Public URLs must be added as project domains, as `kenn-pit-wall.vercel.app` is.
 - Screen readers read the timing tower in car-number DOM order. Rows are positioned visually with transforms so they can animate.
 
 ## Next steps (roadmap; cut for time)
@@ -63,5 +64,5 @@ Context for anyone (or any future session) picking this project up. Read this an
 5. Observability: structured JSON logs, correlation IDs, request logging, web vitals reporting, an error boundary.
 6. Security headers and rate limiting (`AddRateLimiter`) on the API.
 7. SignalR to stream replay frames in live mode.
-8. docker-compose for API plus web in live mode (the API Dockerfile exists).
+8. docker-compose for API plus web in live mode. The API Dockerfile builds and runs (verified: `/health` 200, anonymous `/api/races` 401); it starts with an empty DB, so ingest or mount `api/db`.
 9. More races; sector-level timing; driver focus mode on the track map.
