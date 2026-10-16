@@ -2,7 +2,7 @@
 
 Replay a Grand Prix the way a race strategist sees it: every car moving on the track map, a timing tower that stays in sync, tyre strategy, gaps to the leader and fastest-lap telemetry.
 
-**Live demo:** https://f1-pit-wall-iota.vercel.app (sign in with one of the demo accounts on the login page)
+**Live demo:** https://kenn-pit-wall.vercel.app (sign in with one of the demo accounts on the login page)
 
 Races included: 2025 Abu Dhabi GP (title decider), 2025 British GP (safety cars, intermediates), 2025 Italian GP.
 

@@ -4,7 +4,7 @@ Context for anyone (or any future session) picking this project up. Read this an
 
 ## Status (2026-10-16)
 
-- Live: https://f1-pit-wall-iota.vercel.app (Vercel project `f1-pit-wall`, root directory `web`, snapshot mode)
+- Live: https://kenn-pit-wall.vercel.app (alias; also https://f1-pit-wall-iota.vercel.app). Vercel project `ken-vercel-062926/f1-pit-wall`, Root Directory `web`, git-connected: every push to `main` deploys. Note `f1-pit-wall.vercel.app` belongs to someone else.
 - Repo: https://github.com/kennjaramilla/f1-pit-wall (public)
 - Races cached: 9839 Abu Dhabi 2025, 9947 Britain 2025, 9912 Italy 2025
 - Tests: xUnit 11, Vitest 42, Cypress 12, all green locally. CI runs dotnet build/test plus web lint, typecheck, Vitest and build.
@@ -16,7 +16,7 @@ Context for anyone (or any future session) picking this project up. Read this an
 | --- | --- |
 | Add a race | `cd api && dotnet run -- ingest <sessionKey>`. Find keys with `https://api.openf1.org/v1/sessions?year=2025&session_name=Race`. |
 | Refresh the snapshot | `cd api && dotnet run -- export ../web/public/data`, then commit `web/public/data` |
-| Redeploy | `cd web && npx vercel@latest deploy --prod --yes` |
+| Redeploy | push to `main` (git-connected), or from the repo root: `npx vercel@latest deploy --prod --yes` (Root Directory is `web`) |
 | Run live mode | API: `Auth__Secret=… dotnet run --urls http://localhost:5101`. Web: `NEXT_PUBLIC_DATA_MODE=live API_URL=http://localhost:5101 npm run dev`. |
 | Tests | `dotnet test`; `cd web && npm test`; `npm run build && npm run e2e:ci` |
 
