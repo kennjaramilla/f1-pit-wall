@@ -66,7 +66,7 @@ Context for anyone (or any future session) picking this project up. Read this an
 ## Next steps (roadmap; cut for time)
 
 1. Audit log (sign-ins, admin actions) with masked emails for non-self views.
-2. Server-side race notes with an ownership check (404 for other users' notes, so their existence isn't leaked), plus "download my data" and "delete my notes". Notes currently live in localStorage per user (demo mode).
+2. Wire live mode to the notes API. The API side is done: `api/Endpoints/NoteEndpoints.cs` (own-notes CRUD with 404 for other users' notes, soft delete, `GET /api/me/export`, `DELETE /api/me/notes`, admin counts-only stats) in a separate `notes.db` so re-ingesting races never touches user data. The web still keeps notes in localStorage per user (snapshot mode).
 3. Lambda hosting (`Amazon.Lambda.AspNetCoreServer.Hosting`) plus a SAM template with the SQLite file bundled read-only; then CDK or SAM deploy from CI.
 4. Cypress in CI (`cypress-io/github-action` against `next start`).
 5. Observability: structured JSON logs, correlation IDs, request logging, web vitals reporting, an error boundary.

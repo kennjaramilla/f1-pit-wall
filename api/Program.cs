@@ -16,6 +16,10 @@ OpenF1Client.CacheDir = builder.Configuration["OpenF1:CacheDir"] ?? Path.Combine
 Directory.CreateDirectory(OpenF1Client.CacheDir);
 
 builder.Services.AddDbContext<PitWallDb>(o => o.UseSqlite($"Data Source={dbPath}"));
+// User notes live in their own file: re-ingesting or deleting the race cache never touches them.
+var notesPath = builder.Configuration["Database:NotesPath"] ?? Path.Combine(Path.GetDirectoryName(dbPath)!, "notes.db");
+builder.Services.AddDbContext<NotesDb>(o => o.UseSqlite($"Data Source={notesPath}"));
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IngestionService>();
 builder.Services.AddScoped<RaceQueries>();
 builder.Services.AddTransient<BufferContentHandler>();
@@ -32,17 +36,20 @@ openF1.AddHttpMessageHandler<BufferContentHandler>(); // inner handler: runs ins
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);
 builder.Services.AddPitWallAuth(builder.Configuration);
 builder.Services.AddProblemDetails();
-builder.Services.AddHealthChecks().AddDbContextCheck<PitWallDb>();
+builder.Services.AddHealthChecks().AddDbContextCheck<PitWallDb>().AddDbContextCheck<NotesDb>();
 builder.Services.AddOpenApi();
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
     .WithOrigins((builder.Configuration["Cors:Origins"] ?? "http://localhost:3000,http://localhost:3101").Split(','))
-    .WithMethods("GET", "POST")
+    .WithMethods("GET", "POST", "PATCH", "DELETE")
     .AllowAnyHeader()));
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
+{
     scope.ServiceProvider.GetRequiredService<PitWallDb>().Database.EnsureCreated();
+    scope.ServiceProvider.GetRequiredService<NotesDb>().Database.EnsureCreated();
+}
 
 // CLI: `ingest <sessionKey...>` caches races; `export <dir>` writes the static snapshot for the web app.
 if (args.FirstOrDefault() is "ingest" or "export")
@@ -66,6 +73,7 @@ app.MapScalarApiReference("/docs");
 app.MapGet("/", () => Results.Redirect("/docs")).ExcludeFromDescription();
 app.MapHealthChecks("/health");
 app.MapRaceEndpoints();
+app.MapNoteEndpoints();
 
 app.Run();
 
