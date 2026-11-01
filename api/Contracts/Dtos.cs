@@ -54,3 +54,17 @@ public record ReplayDriverDto(int Driver, int?[] Xy);
 public record TelemetryPointDto(double D, int Speed, int Throttle, bool Brake, int Gear, bool Drs, int? X, int? Y);
 
 public record TelemetryDto(int Driver, int Lap, long LapTimeMs, TelemetryPointDto[] Points);
+
+public record NoteDto(Guid Id, int RaceKey, string Title, string Body, string Category, int Lap,
+    DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
+
+/// Create sends every field; PATCH sends only the fields that change.
+public record NoteInput(string? Title, string? Body, string? Category, int? Lap);
+
+public record NotesExportDto(string UserId, DateTimeOffset ExportedAt, IReadOnlyList<NoteExportDto> Notes);
+
+public record NoteExportDto(Guid Id, int RaceKey, string Title, string Body, string Category, int Lap,
+    DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, DateTimeOffset? DeletedAt);
+
+/// What an admin sees: volumes only, never note content or who wrote what.
+public record NoteStatsDto(int Authors, int LiveNotes, int DeletedNotes);
