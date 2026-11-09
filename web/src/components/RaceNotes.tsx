@@ -4,17 +4,16 @@ import { useRef, useState } from "react";
 import type { NoteDraft } from "@/lib/notes";
 import type { RaceModel } from "@/lib/race";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { noteAdded, noteDeleted, noteUpdated, selectRaceNotes } from "@/store/notesSlice";
 import { seeked } from "@/store/replaySlice";
 import { selectCurrentLap } from "@/store/selectors";
+import { useRaceNotes } from "@/store/useRaceNotes";
 import { NoteForm } from "./NoteForm";
 
 type Mode = { kind: "list" } | { kind: "create" } | { kind: "edit"; id: string };
 
 export function RaceNotes({ model }: { model: RaceModel }) {
   const raceKey = model.bundle.race.sessionKey;
-  const notes = useAppSelector((s) => selectRaceNotes(s, raceKey));
-  const userId = useAppSelector((s) => s.auth.session?.sub);
+  const { notes, storage, loading, error, add, update, remove } = useRaceNotes(raceKey);
   const lap = useAppSelector(selectCurrentLap);
   const dispatch = useAppDispatch();
   const [mode, setMode] = useState<Mode>({ kind: "list" });
@@ -30,7 +29,7 @@ export function RaceNotes({ model }: { model: RaceModel }) {
     trigger.current = el;
     setMode(next);
   };
-  const toInput = (d: NoteDraft) => ({ raceKey, title: d.title.trim(), body: d.body.trim(), category: d.category, lap: Number(d.lap) });
+  const toFields = (d: NoteDraft) => ({ title: d.title.trim(), body: d.body.trim(), category: d.category, lap: Number(d.lap) });
   const seekLap = (n: number) => {
     const start = model.bundle.lapStarts.find((l) => l.lap === n);
     if (start) dispatch(seeked(start.t));
@@ -40,7 +39,11 @@ export function RaceNotes({ model }: { model: RaceModel }) {
   return (
     <div className="px-4 pb-4" data-cy="race-notes">
       <div className="flex flex-wrap items-center gap-3 py-3">
-        <p className="text-xs text-muted">Demo mode: notes are stored on this device and visible only to you.</p>
+        <p className="text-xs text-muted">
+          {storage === "account"
+            ? "Notes are saved to your account and visible only to you."
+            : "Demo mode: notes are stored on this device and visible only to you."}
+        </p>
         {mode.kind === "list" && (
           <button
             type="button"
@@ -53,14 +56,20 @@ export function RaceNotes({ model }: { model: RaceModel }) {
         )}
       </div>
 
-      {mode.kind === "create" && userId && (
+      {error && (
+        <p role="alert" className="mb-3 rounded-md border border-red/40 px-3 py-2 text-sm text-red" data-cy="notes-error">
+          {error}
+        </p>
+      )}
+
+      {mode.kind === "create" && (
         <NoteForm
           initial={{ title: "", body: "", category: "Strategy", lap: String(lap) }}
           totalLaps={model.totalLaps}
           submitLabel="Save note"
           onCancel={close}
           onSubmit={(d) => {
-            dispatch(noteAdded({ ...toInput(d), ownerId: userId }));
+            add({ raceKey, ...toFields(d) });
             close();
           }}
         />
@@ -73,13 +82,15 @@ export function RaceNotes({ model }: { model: RaceModel }) {
           submitLabel="Save changes"
           onCancel={close}
           onSubmit={(d) => {
-            dispatch(noteUpdated(editing.id, toInput(d)));
+            update(editing.id, toFields(d));
             close();
           }}
         />
       )}
 
-      {notes.length === 0 && mode.kind === "list" ? (
+      {loading ? (
+        <p className="py-8 text-center text-sm text-muted">Loading your notes…</p>
+      ) : notes.length === 0 && mode.kind === "list" ? (
         <p className="py-8 text-center text-sm text-muted">No notes for this race yet. Pause on a moment that matters and add one.</p>
       ) : (
         <ul className="mt-3 divide-y divide-border" aria-label="Your notes">
@@ -106,7 +117,7 @@ export function RaceNotes({ model }: { model: RaceModel }) {
                     type="button"
                     autoFocus
                     onClick={() => {
-                      dispatch(noteDeleted(n.id));
+                      remove(n.id);
                       setConfirming(null);
                     }}
                     className="rounded-md bg-red px-2.5 py-1 text-xs font-semibold text-black"

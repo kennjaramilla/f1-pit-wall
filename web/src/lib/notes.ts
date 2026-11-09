@@ -18,6 +18,19 @@ export interface Note {
   deletedAt: string | null;
 }
 
+export interface NoteInput {
+  raceKey: number;
+  title: string;
+  body: string;
+  category: NoteCategory;
+  lap: number;
+}
+
+/** What the notes API returns: always the caller's own, live notes. */
+export type NoteDto = Omit<Note, "ownerId" | "deletedAt">;
+
+export const fromDto = (dto: NoteDto, ownerId: string): Note => ({ ...dto, ownerId, deletedAt: null });
+
 export interface NoteDraft {
   title: string;
   body: string;

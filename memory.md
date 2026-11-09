@@ -48,13 +48,14 @@ Context for anyone (or any future session) picking this project up. Read this an
 - **Least privilege and audit** (HIPAA-style "minimum necessary"): roles inherit upward from one permission table that is checked server-side. An audit log of sign-ins and admin actions is on the roadmap.
 - **Accessibility as a feature:** keyboard shortcuts, native `<dialog>`, WAI-ARIA tabs, tyre letters as well as colours, dashed teammate lines, AA contrast, reduced-motion support, axe in CI-ready Cypress specs.
 
-## Race notes (demo mode)
+## Race notes
 
 - Strategist and Admin can pin notes (title, note, category, lap) to a race. Viewers see a locked tab.
 - `notesSlice` uses `createEntityAdapter`. A listener middleware (`notesPersistence`) writes the user's notes to `localStorage["pitwall:notes:<userId>"]`. `StoreProvider` hydrates them after mount because localStorage is browser-only.
 - Selectors filter by the session's user id, so users only see their own notes. Deletes are soft (`deletedAt`) for retention and audit.
 - Notes appear as markers above the scrubber and in the Notes tab. Clicking either seeks to that lap.
-- This is not real security: localStorage is device-local and user-editable. The server-side version is on the roadmap.
+- Components call `useRaceNotes(raceKey)` (`store/useRaceNotes.ts`) and don't know where notes live. Live mode uses the notes API through RTK Query (`raceNotes`, `addNote`, `updateNote`, `deleteNote` in `f1Api.ts`, keyed by race and user id, invalidated by tag). Snapshot mode uses the slice and localStorage, which is device-local and user-editable, so it's labelled "Demo mode".
+- The `/api/live/*` proxy forwards GET, POST, PATCH and DELETE with the JSON body and the user's token.
 
 ## Known issues
 
@@ -66,7 +67,7 @@ Context for anyone (or any future session) picking this project up. Read this an
 ## Next steps (roadmap; cut for time)
 
 1. Audit log (sign-ins, admin actions) with masked emails for non-self views.
-2. Wire live mode to the notes API. The API side is done: `api/Endpoints/NoteEndpoints.cs` (own-notes CRUD with 404 for other users' notes, soft delete, `GET /api/me/export`, `DELETE /api/me/notes`, admin counts-only stats) in a separate `notes.db` so re-ingesting races never touches user data. The web still keeps notes in localStorage per user (snapshot mode).
+2. "Download my data" and "Erase my notes" buttons in live mode (`GET /api/me/export`, `DELETE /api/me/notes` already exist).
 3. Lambda hosting (`Amazon.Lambda.AspNetCoreServer.Hosting`) plus a SAM template with the SQLite file bundled read-only; then CDK or SAM deploy from CI.
 4. Cypress in CI (`cypress-io/github-action` against `next start`).
 5. Observability: structured JSON logs, correlation IDs, request logging, web vitals reporting, an error boundary.

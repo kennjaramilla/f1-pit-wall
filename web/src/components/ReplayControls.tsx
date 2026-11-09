@@ -3,9 +3,9 @@
 import { formatRaceClock } from "@/lib/format";
 import type { RaceModel } from "@/lib/race";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { selectRaceNotes } from "@/store/notesSlice";
 import { SPEEDS, paused, played, seeked, speedChanged } from "@/store/replaySlice";
 import { selectCurrentLap, selectReplay } from "@/store/selectors";
+import { useRaceNotes } from "@/store/useRaceNotes";
 
 const PERIOD_STYLE: Record<string, { colour: string; label: string }> = {
   sc: { colour: "var(--flag-sc)", label: "Safety car" },
@@ -20,7 +20,7 @@ export function ReplayControls({ model, onShowHelp }: { model: RaceModel; onShow
   const seek = (ms: number) => dispatch(seeked(ms));
   const { windowStartMs: min, windowEndMs: max, lapStarts, periods } = model.bundle;
   const pct = (ms: number) => ((ms - min) / (max - min)) * 100;
-  const notes = useAppSelector((s) => selectRaceNotes(s, model.bundle.race.sessionKey));
+  const { notes } = useRaceNotes(model.bundle.race.sessionKey);
   const lapStart = (n: number) => lapStarts.find((l) => l.lap === n)?.t;
   const lapTicks = lapStarts.filter((l) => l.lap === 1 || l.lap % 5 === 0);
 
