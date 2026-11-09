@@ -7,9 +7,13 @@ async function forward(request: Request, { params }: { params: Promise<{ path: s
   if (!apiUrl) return Response.json({ title: "Live API not configured" }, { status: 503 });
   const { path } = await params;
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const hasBody = request.method !== "GET" && request.method !== "DELETE";
+  if (hasBody) headers["Content-Type"] = request.headers.get("Content-Type") ?? "application/json";
   const upstream = await fetch(`${apiUrl.replace(/\/$/, "")}/api/${path.map(encodeURIComponent).join("/")}`, {
     method: request.method,
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers,
+    body: hasBody ? await request.text() : undefined,
     cache: "no-store",
   });
   return new Response(upstream.body, {
@@ -18,4 +22,4 @@ async function forward(request: Request, { params }: { params: Promise<{ path: s
   });
 }
 
-export { forward as GET, forward as POST };
+export { forward as DELETE, forward as GET, forward as PATCH, forward as POST };

@@ -1,16 +1,8 @@
 import { createEntityAdapter, createSelector, createSlice, nanoid, type PayloadAction } from "@reduxjs/toolkit";
-import type { Note, NoteCategory } from "@/lib/notes";
+import type { Note, NoteInput } from "@/lib/notes";
 import type { RootState } from "./store";
 
 const adapter = createEntityAdapter<Note>({ sortComparer: (a, b) => a.lap - b.lap || a.createdAt.localeCompare(b.createdAt) });
-
-export interface NoteInput {
-  raceKey: number;
-  title: string;
-  body: string;
-  category: NoteCategory;
-  lap: number;
-}
 
 export const notesSlice = createSlice({
   name: "notes",
