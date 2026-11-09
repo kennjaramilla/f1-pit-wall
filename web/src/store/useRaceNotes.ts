@@ -33,9 +33,15 @@ export function useRaceNotes(raceKey: number) {
       notes: local,
       loading: false,
       error: null,
-      add: (input: NoteInput) => userId && dispatch(noteAdded({ ...input, ownerId: userId })),
-      update: (id: string, changes: Changes) => dispatch(noteUpdated(id, changes)),
-      remove: (id: string) => dispatch(noteDeleted(id)),
+      add: async (input: NoteInput) => {
+        if (userId) dispatch(noteAdded({ ...input, ownerId: userId }));
+      },
+      update: async (id: string, changes: Changes) => {
+        dispatch(noteUpdated(id, changes));
+      },
+      remove: async (id: string) => {
+        dispatch(noteDeleted(id));
+      },
     };
   }
 
@@ -45,8 +51,15 @@ export function useRaceNotes(raceKey: number) {
     notes: remote.data ?? [],
     loading: remote.isLoading,
     error: failed ? errorMessage(failed.error) : null,
-    add: (input: NoteInput) => add(input),
-    update: (id: string, changes: Changes) => update({ id, raceKey, changes }),
-    remove: (id: string) => remove({ id, raceKey }),
+    // Failures surface through `error`; callers only need to know when the request settled.
+    add: async (input: NoteInput) => {
+      await add(input);
+    },
+    update: async (id: string, changes: Changes) => {
+      await update({ id, raceKey, changes });
+    },
+    remove: async (id: string) => {
+      await remove({ id, raceKey });
+    },
   };
 }

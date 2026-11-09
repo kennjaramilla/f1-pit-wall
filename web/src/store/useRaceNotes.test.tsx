@@ -76,9 +76,7 @@ describe("useRaceNotes in snapshot mode", () => {
     vi.stubGlobal("fetch", fetch);
     const { result } = await setup();
     expect(result.current.storage).toBe("device");
-    act(() => {
-      result.current.add(input);
-    });
+    await act(() => result.current.add(input));
     expect(result.current.notes).toMatchObject([{ title: "Undercut window", ownerId: "u-ana" }]);
     expect(fetch).not.toHaveBeenCalled();
   });
