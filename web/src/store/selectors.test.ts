@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { makeBundle } from "@/test/fixtures";
 import { f1Api } from "./f1Api";
 import { raceOpened, seeked } from "./replaySlice";
-import { selectCurrentLap, selectLeaderboard, selectRaceModel, selectSelected, selectTrackStatus } from "./selectors";
+import { selectCurrentLap, selectLeaderboard, selectRaceModel, selectRacePace, selectSelected, selectTrackStatus } from "./selectors";
 import { makeStore } from "./store";
 
 async function storeWithRace() {
@@ -30,6 +30,14 @@ describe("selectors", () => {
     expect(selectLeaderboard(store.getState()).map((r) => r.driver.acronym)).toEqual(["AAA", "BBB", "CCC"]);
     store.dispatch(seeked(280_000));
     expect(selectTrackStatus(store.getState())).toBe("chequered");
+  });
+
+  it("computes race pace once per race, not per clock tick", async () => {
+    const store = await storeWithRace();
+    const pace = selectRacePace(store.getState());
+    expect(pace.map((r) => r.driver)).toEqual([1, 2, 3]);
+    store.dispatch(seeked(200_000));
+    expect(selectRacePace(store.getState())).toBe(pace);
   });
 
   it("returns a stable Set for the selection", async () => {

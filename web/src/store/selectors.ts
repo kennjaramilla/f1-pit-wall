@@ -1,4 +1,5 @@
 import { createSelector } from "@reduxjs/toolkit";
+import { racePace } from "@/lib/pace";
 import { buildProgress } from "@/lib/progress";
 import { buildRaceModel, currentLap, leaderboardAt, periodAt, recentEvents } from "@/lib/race";
 import { f1Api } from "./f1Api";
@@ -27,6 +28,9 @@ export const selectLeaderboard = createSelector([selectRaceModel, selectProgress
 );
 
 export const selectCurrentLap = createSelector([selectRaceModel, selectRaceTime], (model, t) => (model ? currentLap(model, t) : 1));
+
+/** Clean-lap pace per driver; depends only on the race, not the replay clock. */
+export const selectRacePace = createSelector([selectRaceModel], (model) => (model ? racePace(model) : []));
 
 export type TrackStatus = "pre" | "green" | "sc" | "vsc" | "red" | "chequered";
 
