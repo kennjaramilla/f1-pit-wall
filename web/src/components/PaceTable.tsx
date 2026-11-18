@@ -21,13 +21,27 @@ export function PaceTable({ model, pace }: { model: RaceModel; pace: DriverPace[
         <caption className="sr-only">Race pace from clean green-flag laps, fastest median first</caption>
         <thead className="text-left text-xs uppercase tracking-wider text-muted">
           <tr>
-            <th scope="col" className="px-3 py-2">#</th>
-            <th scope="col" className="px-3 py-2">Driver</th>
-            <th scope="col" className="px-3 py-2 text-right">Median</th>
-            <th scope="col" className="px-3 py-2 text-right">Delta</th>
-            <th scope="col" className="px-3 py-2 text-right">Best</th>
-            <th scope="col" className="px-3 py-2 text-right" title="Standard deviation of clean laps">Spread</th>
-            <th scope="col" className="px-3 py-2">Stints (degradation)</th>
+            <th scope="col" className="px-3 py-2">
+              #
+            </th>
+            <th scope="col" className="px-3 py-2">
+              Driver
+            </th>
+            <th scope="col" className="px-3 py-2 text-right">
+              Median
+            </th>
+            <th scope="col" className="px-3 py-2 text-right">
+              Delta
+            </th>
+            <th scope="col" className="px-3 py-2 text-right">
+              Best
+            </th>
+            <th scope="col" className="px-3 py-2 text-right" title="Standard deviation of clean laps">
+              Spread
+            </th>
+            <th scope="col" className="px-3 py-2">
+              Stints (degradation)
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -62,14 +76,18 @@ export function PaceTable({ model, pace }: { model: RaceModel; pace: DriverPace[
                   {row.deltaMs == null ? "—" : row.deltaMs === 0 ? "FASTEST" : `+${sec(row.deltaMs)}`}
                 </td>
                 <td className="tabular px-3 py-2 text-right font-mono">{formatLapTime(row.bestMs)}</td>
-                <td className="tabular px-3 py-2 text-right font-mono text-muted">{row.spreadMs == null ? "—" : `±${sec(row.spreadMs, 2)}`}</td>
+                <td className="tabular px-3 py-2 text-right font-mono text-muted">
+                  {row.spreadMs == null ? "—" : `±${sec(row.spreadMs, 2)}`}
+                </td>
                 <td className="px-3 py-2">
                   <ul className="flex flex-wrap gap-3">
                     {row.stints.map((s) => (
                       <li key={s.stint} className="flex items-center gap-1">
                         <TyreBadge name={s.compound} size="sm" />
                         <span className="tabular text-xs text-muted">
-                          {s.degMsPerLap == null ? `${s.laps} laps` : `${s.degMsPerLap >= 0 ? "+" : "−"}${sec(Math.abs(s.degMsPerLap))}s/lap`}
+                          {s.degMsPerLap == null
+                            ? `${s.laps} laps`
+                            : `${s.degMsPerLap >= 0 ? "+" : "−"}${sec(Math.abs(s.degMsPerLap))}s/lap`}
                         </span>
                       </li>
                     ))}

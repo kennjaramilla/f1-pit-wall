@@ -7,13 +7,15 @@ import { useAppSelector } from "@/store/hooks";
 import { selectCan } from "@/store/authSlice";
 import { GapChart } from "./GapChart";
 import { RaceNotes } from "./RaceNotes";
+import { RacePace } from "./RacePace";
 import { StrategyChart } from "./StrategyChart";
 import { TelemetryCompare } from "./TelemetryCompare";
 import { Panel } from "./ui";
 
-const TABS: { id: "strategy" | "gaps" | "telemetry" | "notes"; label: string; permission: Permission }[] = [
+const TABS: { id: "strategy" | "gaps" | "pace" | "telemetry" | "notes"; label: string; permission: Permission }[] = [
   { id: "strategy", label: "Tyre strategy", permission: "replay:view" },
   { id: "gaps", label: "Gap to leader", permission: "replay:view" },
+  { id: "pace", label: "Race pace", permission: "replay:view" },
   { id: "telemetry", label: "Telemetry", permission: "telemetry:view" },
   { id: "notes", label: "Notes", permission: "notes:edit" },
 ];
@@ -77,6 +79,7 @@ export function AnalysisTabs({ model }: { model: RaceModel }) {
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} tabIndex={0}>
         {tab === "strategy" && <StrategyChart model={model} />}
         {tab === "gaps" && <GapChart model={model} />}
+        {tab === "pace" && <RacePace model={model} />}
         {tab === "telemetry" && (canTelemetry ? <TelemetryCompare model={model} /> : <LockedFeature permission="telemetry:view" />)}
         {tab === "notes" && (canNotes ? <RaceNotes model={model} /> : <LockedFeature permission="notes:edit" />)}
       </div>
