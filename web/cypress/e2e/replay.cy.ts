@@ -55,6 +55,16 @@ describe("race replay", () => {
     cy.get("[data-cy=telemetry] svg[aria-label='Speed trace by distance']").should("be.visible");
   });
 
+  it("ranks race pace and follows the driver selection", () => {
+    cy.get("[data-cy=tab-pace]").click().should("have.attr", "aria-selected", "true");
+    cy.get("[data-cy=pace-row]").should("have.length", 20).first().should("contain", "FASTEST");
+    cy.get("[data-cy=lap-time-chart] g[data-cy^=pace-series]").should("have.length", 5);
+    cy.get("[data-cy=pace-row]").eq(7).find("button").click().should("have.attr", "aria-pressed", "true");
+    cy.get("[data-cy=lap-time-chart] g[data-cy^=pace-series]").should("have.length", 1);
+    cy.get("[data-cy=race-pace]").should("contain", "Showing your selected drivers");
+    cy.checkA11yStrict();
+  });
+
   it("has no serious accessibility violations", () => {
     cy.checkA11yStrict();
   });
