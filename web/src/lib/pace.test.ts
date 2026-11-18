@@ -94,7 +94,19 @@ describe("stintPace", () => {
   });
 
   it("returns null slope for a flat x axis", () => {
-    expect(slope([[1, 1], [1, 2], [1, 3]])).toBeNull();
-    expect(slope([[0, 0], [1, 2], [2, 4]])).toBe(2);
+    expect(
+      slope([
+        [1, 1],
+        [1, 2],
+        [1, 3],
+      ]),
+    ).toBeNull();
+    expect(
+      slope([
+        [0, 0],
+        [1, 2],
+        [2, 4],
+      ]),
+    ).toBe(2);
   });
 });
