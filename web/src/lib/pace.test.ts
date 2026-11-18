@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeBundle } from "@/test/fixtures";
-import { cleanLaps, excludeReason, median, racePace, spread } from "./pace";
+import { cleanLaps, excludeReason, median, racePace, slope, spread, stintPace } from "./pace";
 import { buildRaceModel } from "./race";
 import type { RaceBundle } from "./types";
 
@@ -67,5 +67,34 @@ describe("racePace", () => {
     expect(rows[0]).toMatchObject({ bestMs: 89_800, medianMs: 90_000, deltaMs: 0 });
     expect(rows[1].deltaMs).toBe(1_250);
     expect(rows[2]).toMatchObject({ medianMs: null, deltaMs: null, laps: [] });
+  });
+});
+
+describe("stintPace", () => {
+  it("fits a degradation slope per stint from tyre age", () => {
+    const b = makeBundle();
+    b.race.totalLaps = 8;
+    b.periods = [];
+    b.pits = [{ driver: 1, lap: 4, t: 0, laneDuration: 20, stopDuration: 2.5 }];
+    b.stints = [
+      { driver: 1, stint: 1, compound: "SOFT", lapStart: 1, lapEnd: 4, tyreAgeAtStart: 0 },
+      { driver: 1, stint: 2, compound: "HARD", lapStart: 5, lapEnd: 8, tyreAgeAtStart: 3 },
+    ];
+    const times = [96_000, 90_000, 90_100, 110_000, 100_000, 91_000, 91_050, 91_100];
+    let t = 0;
+    b.laps = times.map((d, i) => {
+      const lap = { driver: 1, lap: i + 1, t, durationMs: d, s1: null, s2: null, s3: null, pitOut: i === 4 };
+      t += d;
+      return lap;
+    });
+    const [soft, hard] = stintPace(buildRaceModel(b), 1);
+    expect(soft).toMatchObject({ compound: "SOFT", laps: 2, avgMs: 90_050, degMsPerLap: null });
+    expect(hard).toMatchObject({ compound: "HARD", laps: 3, avgMs: 91_050 });
+    expect(hard.degMsPerLap).toBeCloseTo(50);
+  });
+
+  it("returns null slope for a flat x axis", () => {
+    expect(slope([[1, 1], [1, 2], [1, 3]])).toBeNull();
+    expect(slope([[0, 0], [1, 2], [2, 4]])).toBe(2);
   });
 });

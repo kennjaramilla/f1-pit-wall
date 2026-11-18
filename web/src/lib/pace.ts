@@ -17,6 +17,16 @@ export interface DriverPace {
   spreadMs: number | null;
   /** Median minus the fastest median in the race. */
   deltaMs: number | null;
+  stints: StintPace[];
+}
+
+export interface StintPace {
+  stint: number;
+  compound: string;
+  laps: number;
+  avgMs: number | null;
+  /** Lap time lost per lap of tyre age (least squares); null under 3 clean laps. */
+  degMsPerLap: number | null;
 }
 
 /** Laps slower than this multiple of the driver's median are traffic, mistakes or damage. */
@@ -55,6 +65,32 @@ export function cleanLaps(model: RaceModel, driver: number): PaceLap[] {
   return m == null ? laps : laps.filter((l) => l.durationMs <= m * OUTLIER_FACTOR);
 }
 
+/** Least-squares slope of y over x. */
+export function slope(points: [number, number][]): number | null {
+  if (points.length < 3) return null;
+  const n = points.length;
+  const mx = points.reduce((a, [x]) => a + x, 0) / n;
+  const my = points.reduce((a, [, y]) => a + y, 0) / n;
+  const sxx = points.reduce((a, [x]) => a + (x - mx) ** 2, 0);
+  if (sxx === 0) return null;
+  return points.reduce((a, [x, y]) => a + (x - mx) * (y - my), 0) / sxx;
+}
+
+/** Average pace and tyre degradation for each stint, from clean laps only. */
+export function stintPace(model: RaceModel, driver: number, laps = cleanLaps(model, driver)): StintPace[] {
+  return (model.stints.get(driver) ?? []).map((s) => {
+    const inStint = laps.filter((l) => l.lap >= s.lapStart && l.lap <= s.lapEnd);
+    const times = inStint.map((l) => l.durationMs);
+    return {
+      stint: s.stint,
+      compound: s.compound,
+      laps: inStint.length,
+      avgMs: times.length ? times.reduce((a, b) => a + b, 0) / times.length : null,
+      degMsPerLap: slope(inStint.map((l) => [s.tyreAgeAtStart + l.lap - s.lapStart, l.durationMs])),
+    };
+  });
+}
+
 /** Pace per driver, fastest median first; drivers without clean laps go last. */
 export function racePace(model: RaceModel): DriverPace[] {
   const rows = model.order.map((driver) => {
@@ -67,6 +103,7 @@ export function racePace(model: RaceModel): DriverPace[] {
       medianMs: median(times),
       spreadMs: spread(times),
       deltaMs: null as number | null,
+      stints: stintPace(model, driver, laps),
     };
   });
   const fastest = Math.min(...rows.map((r) => r.medianMs ?? Infinity));
