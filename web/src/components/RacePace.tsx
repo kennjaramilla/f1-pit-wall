@@ -27,7 +27,8 @@ export function RacePace({ model }: { model: RaceModel }) {
     <div className="px-4 pb-4" data-cy="race-pace">
       <p className="py-3 text-xs text-muted">
         Green-flag laps only: lap 1, pit in and out laps, safety car and VSC laps, and laps more than 7% off a driver&apos;s median are left
-        out. {selected.size > 0 ? "Showing your selected drivers." : `Showing the fastest ${shown.length}; select drivers to compare.`}
+        out. A negative stint trend means fuel burn-off outweighed tyre wear.{" "}
+        {selected.size > 0 ? "Showing your selected drivers." : `Showing the fastest ${shown.length}; select drivers to compare.`}
       </p>
       <LapTimeChart model={model} series={shown} />
       <PaceTable model={model} pace={pace} />

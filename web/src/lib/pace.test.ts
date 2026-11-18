@@ -71,7 +71,7 @@ describe("racePace", () => {
 });
 
 describe("stintPace", () => {
-  it("fits a degradation slope per stint from tyre age", () => {
+  it("fits a lap time trend per stint from tyre age", () => {
     const b = makeBundle();
     b.race.totalLaps = 8;
     b.periods = [];
@@ -88,9 +88,9 @@ describe("stintPace", () => {
       return lap;
     });
     const [soft, hard] = stintPace(buildRaceModel(b), 1);
-    expect(soft).toMatchObject({ compound: "SOFT", laps: 2, avgMs: 90_050, degMsPerLap: null });
+    expect(soft).toMatchObject({ compound: "SOFT", laps: 2, avgMs: 90_050, trendMsPerLap: null });
     expect(hard).toMatchObject({ compound: "HARD", laps: 3, avgMs: 91_050 });
-    expect(hard.degMsPerLap).toBeCloseTo(50);
+    expect(hard.trendMsPerLap).toBeCloseTo(50);
   });
 
   it("returns null slope for a flat x axis", () => {

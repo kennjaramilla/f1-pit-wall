@@ -40,7 +40,7 @@ export function PaceTable({ model, pace }: { model: RaceModel; pace: DriverPace[
               Spread
             </th>
             <th scope="col" className="px-3 py-2">
-              Stints (degradation)
+              Stints (trend per lap)
             </th>
           </tr>
         </thead>
@@ -85,9 +85,9 @@ export function PaceTable({ model, pace }: { model: RaceModel; pace: DriverPace[
                       <li key={s.stint} className="flex items-center gap-1">
                         <TyreBadge name={s.compound} size="sm" />
                         <span className="tabular text-xs text-muted">
-                          {s.degMsPerLap == null
+                          {s.trendMsPerLap == null
                             ? `${s.laps} laps`
-                            : `${s.degMsPerLap >= 0 ? "+" : "−"}${sec(Math.abs(s.degMsPerLap))}s/lap`}
+                            : `${s.trendMsPerLap >= 0 ? "+" : "−"}${sec(Math.abs(s.trendMsPerLap))}s/lap`}
                         </span>
                       </li>
                     ))}
