@@ -12,6 +12,7 @@
 4. **Analyse.** Tabs below the replay:
    - **Tyre strategy:** stints per driver by compound, with a current-lap cursor.
    - **Gap to leader:** one line per driver. Hover isolates a line, click pins it. Teammates are told apart by dashes, not colour alone.
+   - **Race pace:** each driver's clean green-flag laps (no lap 1, pit in/out laps, SC/VSC/red flag laps or laps more than 7% off their median) ranked by median, with best lap, spread (consistency) and a lap time trend per stint. A chart plots the lap times of the selected drivers, or the fastest five when nothing is selected. Clicking a row selects the driver everywhere.
    - **Telemetry** (Strategist+): two drivers' fastest laps overlaid by distance (speed, throttle, brake, gear). Hovering moves markers on a mini track map.
    - **Notes** (Strategist+): pin a note (title, note, category, lap) to the race. Notes appear as markers on the scrubber; clicking one seeks to that lap. Create, edit and delete (with confirmation) happen in an inline form. Saved to the user's account through the notes API in live mode; stored per user on this device in demo (snapshot) mode.
 5. **Follow drivers.** Clicking a driver in the tower, the map or a chart selects them everywhere. `Esc` clears the selection.
@@ -63,7 +64,7 @@ Snapshot paths mirror these: `/data/races.json`, `/data/races/{key}.json`, `/dat
 | Client state | `store/notesSlice.ts` | snapshot mode: the user's race notes (entity adapter), persisted to localStorage by listener middleware |
 | Server state | `f1Api.ts` notes endpoints | live mode: the user's race notes from the notes API; `useRaceNotes` picks the source |
 | Session | `store/authSlice.ts` | the signed-in user, preloaded from the verified cookie on the server; read-only on the client |
-| Derived | `store/selectors.ts` (`createSelector`) | race model, GPS progress, leaderboard at time t, current lap, track status, recent events |
+| Derived | `store/selectors.ts` (`createSelector`) | race model, GPS progress, leaderboard at time t, current lap, track status, recent events, race pace (`lib/pace.ts`, computed once per race) |
 | Animation | `lib/replayClock.ts` | 60 fps race time for the track map. Not in Redux. |
 
 **Why the animation clock lives outside Redux.** Dispatching on every animation frame would re-run every selector and re-render every subscriber 60 times a second. Instead, `useReplayEngine` runs `requestAnimationFrame`, moves the car markers directly through a `ReplayClock` subscription, and dispatches `timeSynced` about 5 times a second, plus once on pause. User seeks bump `seekId`, which tells the clock to jump. Routine syncs don't, so there's no feedback loop. The timing tower and charts read the coarse Redux time, which is plenty for numbers that change at timing-line cadence.

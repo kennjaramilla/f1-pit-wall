@@ -57,6 +57,12 @@ Context for anyone (or any future session) picking this project up. Read this an
 - Components call `useRaceNotes(raceKey)` (`store/useRaceNotes.ts`) and don't know where notes live. Live mode uses the notes API through RTK Query (`raceNotes`, `addNote`, `updateNote`, `deleteNote` in `f1Api.ts`, keyed by race and user id, invalidated by tag). Snapshot mode uses the slice and localStorage, which is device-local and user-editable, so it's labelled "Demo mode".
 - The `/api/live/*` proxy forwards GET, POST, PATCH and DELETE with the JSON body and the user's token.
 
+## Race pace
+
+- `lib/pace.ts` is pure: `excludeReason` drops lap 1, pit in/out laps, laps overlapping an SC/VSC/red period and laps without timing; `cleanLaps` then drops laps more than 7% off the driver's median (traffic, mistakes). `racePace` ranks by median with delta, best and standard deviation.
+- The per-stint slope is a least-squares fit of lap time against tyre age. It is a raw trend, not tyre degradation: fuel burn-off (roughly 0.03–0.06 s a lap) is not corrected, so long stints often trend negative. The UI says so.
+- `selectRacePace` depends only on the race model, so scrubbing the replay never recomputes it.
+
 ## Known issues
 
 - Track map labels can overlap when cars bunch up (start, safety car restarts).
@@ -75,3 +81,4 @@ Context for anyone (or any future session) picking this project up. Read this an
 7. SignalR to stream replay frames in live mode.
 8. docker-compose for API plus web in live mode. The API Dockerfile builds and runs (verified on port 5177: `/health` 200, anonymous `/api/races` 401); it starts with an empty DB, so ingest or mount `api/db`.
 9. More races; sector-level timing; driver focus mode on the track map.
+10. Fuel-corrected tyre degradation for the race pace tab (needs a per-circuit fuel effect).
