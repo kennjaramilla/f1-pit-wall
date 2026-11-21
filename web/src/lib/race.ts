@@ -249,10 +249,13 @@ export interface LeaderboardRow {
   inPit: boolean;
   retired: boolean;
   secondary: boolean;
+  /** Holds the fastest lap of the race so far. */
+  fastestLap: boolean;
 }
 
 export function leaderboardAt(model: RaceModel, t: number, pm?: ProgressModel | null): LeaderboardRow[] {
   const rows: LeaderboardRow[] = [];
+  const fastest = fastestLapAt(model, t);
   for (const [n, driver] of model.drivers) {
     const c = model.crossings.get(n) ?? [];
     const lastCross = c.length ? c[c.length - 1] : 0;
@@ -272,6 +275,7 @@ export function leaderboardAt(model: RaceModel, t: number, pm?: ProgressModel | 
       inPit: pit.inPit && !retired,
       retired,
       secondary: model.secondary.has(n),
+      fastestLap: fastest?.driver === n,
     });
   }
   rows.sort((a, b) => Number(a.retired) - Number(b.retired) || a.position - b.position);

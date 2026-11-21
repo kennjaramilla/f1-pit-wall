@@ -69,6 +69,15 @@ export function Leaderboard({ model }: { model: RaceModel }) {
                     }}
                   />
                   <span className="font-bold tracking-wide">{r.driver.acronym}</span>
+                  {r.fastestLap && (
+                    <span
+                      className="rounded bg-purple px-1 text-[10px] font-bold leading-4 text-black"
+                      title="Fastest lap of the race so far"
+                      data-cy="fastest-lap"
+                    >
+                      FL
+                    </span>
+                  )}
                   {delta !== 0 && !r.retired && started && (
                     <span
                       className={`tabular text-[11px] ${delta > 0 ? "text-green" : "text-red"}`}

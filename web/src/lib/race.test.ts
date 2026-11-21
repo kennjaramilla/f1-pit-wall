@@ -90,4 +90,11 @@ describe("fastest lap", () => {
     expect(fastestLapAt(model, 288_999)?.driver).toBe(1);
     expect(fastestLapAt(model, 289_000)).toMatchObject({ driver: 2, lap: 3, durationMs: 88_000 });
   });
+
+  it("marks the holder on the leaderboard", () => {
+    const holder = (t: number) => leaderboardAt(model, t).filter((r) => r.fastestLap).map((r) => r.driver.number);
+    expect(holder(60_000)).toEqual([]);
+    expect(holder(200_000)).toEqual([1]);
+    expect(holder(295_000)).toEqual([2]);
+  });
 });
