@@ -16,7 +16,38 @@ export interface RaceModel {
   secondary: Set<number>;
   stints: Map<number, Stint[]>;
   positions: Map<number, { t: number; position: number }[]>;
+  /** Each time the fastest lap of the race was beaten, in time order. */
+  fastestLaps: FastestLapMark[];
   finishMs: number;
+}
+
+export interface FastestLapMark {
+  /** When the lap was completed. */
+  t: number;
+  driver: number;
+  lap: number;
+  durationMs: number;
+}
+
+/** Walks completed laps in time order and keeps each new fastest one. */
+export function fastestLapMarks(laps: RaceBundle["laps"]): FastestLapMark[] {
+  const done = laps
+    .filter((l) => l.t != null && l.durationMs != null)
+    .map((l) => ({ t: l.t! + l.durationMs!, driver: l.driver, lap: l.lap, durationMs: l.durationMs! }))
+    .sort((a, b) => a.t - b.t);
+  const marks: FastestLapMark[] = [];
+  for (const l of done) if (!marks.length || l.durationMs < marks[marks.length - 1].durationMs) marks.push(l);
+  return marks;
+}
+
+/** The fastest lap completed by time t, or null before anyone has finished a lap. */
+export function fastestLapAt(model: RaceModel, t: number): FastestLapMark | null {
+  let best: FastestLapMark | null = null;
+  for (const m of model.fastestLaps) {
+    if (m.t > t) break;
+    best = m;
+  }
+  return best;
 }
 
 export function lapCrossings(laps: { lap: number; t: number | null; durationMs: number | null }[]): number[] {
@@ -93,6 +124,7 @@ export function buildRaceModel(bundle: RaceBundle): RaceModel {
     secondary,
     stints,
     positions,
+    fastestLaps: fastestLapMarks(bundle.laps),
     finishMs: leaderCross[totalLaps - 1] ?? bundle.windowEndMs,
   };
 }
