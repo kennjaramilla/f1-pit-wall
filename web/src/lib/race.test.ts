@@ -4,6 +4,7 @@ import {
   buildRaceModel,
   countUpTo,
   currentLap,
+  fastestLapAt,
   gapAt,
   lapCrossings,
   leaderboardAt,
@@ -72,5 +73,28 @@ describe("race model", () => {
     expect(rows[0].gap.gapSec).toBe(0);
     expect(rows[2].retired).toBe(true);
     expect(rows[1].compound).toBe("HARD");
+  });
+});
+
+describe("fastest lap", () => {
+  it("keeps only laps that beat the previous fastest, in the order they were set", () => {
+    expect(model.fastestLaps.map((m) => [m.driver, m.lap, m.durationMs])).toEqual([
+      [1, 1, 90_000],
+      [2, 3, 88_000],
+    ]);
+  });
+
+  it("follows the replay clock", () => {
+    expect(fastestLapAt(model, 89_999)).toBeNull();
+    expect(fastestLapAt(model, 90_000)?.driver).toBe(1);
+    expect(fastestLapAt(model, 288_999)?.driver).toBe(1);
+    expect(fastestLapAt(model, 289_000)).toMatchObject({ driver: 2, lap: 3, durationMs: 88_000 });
+  });
+
+  it("marks the holder on the leaderboard", () => {
+    const holder = (t: number) => leaderboardAt(model, t).filter((r) => r.fastestLap).map((r) => r.driver.number);
+    expect(holder(60_000)).toEqual([]);
+    expect(holder(200_000)).toEqual([1]);
+    expect(holder(295_000)).toEqual([2]);
   });
 });

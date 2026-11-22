@@ -1,6 +1,6 @@
 # Pit Wall
 
-Replay a Grand Prix the way a race strategist sees it: every car moving on the track map, a timing tower that stays in sync, tyre strategy, gaps to the leader and fastest-lap telemetry.
+Replay a Grand Prix the way a race strategist sees it: every car moving on the track map, a timing tower that stays in sync (with a purple FL tag on whoever holds the fastest lap so far), tyre strategy, gaps to the leader and fastest-lap telemetry.
 
 **Live demo:** https://kenn-pit-wall.vercel.app (sign in with one of the demo accounts on the login page)
 
